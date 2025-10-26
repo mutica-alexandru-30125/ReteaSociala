@@ -11,6 +11,7 @@ app.layout = html.Div([
         dcc.Input(id="num-nodes", type="number", min=1, step=1, placeholder="Number of nodes"),
         html.Button("Generate", id="btn-generate", n_clicks=0),
         html.Button("Generate Random Graph", id="btn-random", n_clicks=0),
+        html.Button("Add New Node", id="btn-add-node", n_clicks=0),
         html.Label("Mode:", style={"marginLeft": "20px"}),
         dcc.RadioItems(
             id="mode-toggle",
@@ -33,7 +34,19 @@ app.layout = html.Div([
             ],
             value="friend",
             inline=True
-        )
+        ),
+        html.Div([
+            html.Span("Friend", style={"marginRight": "10px", "display": "inline-block"}),
+            html.Span(style={"backgroundColor": "#00b894", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
+            html.Span("Close Friend", style={"marginRight": "10px", "display": "inline-block"}),
+            html.Span(style={"backgroundColor": "#00cec9", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
+            html.Span("Work Colleagues", style={"marginRight": "10px", "display": "inline-block"}),
+            html.Span(style={"backgroundColor": "#fdcb6e", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
+            html.Span("Family", style={"marginRight": "10px", "display": "inline-block"}),
+            html.Span(style={"backgroundColor": "#e17055", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
+            html.Span("Acquaintance", style={"marginRight": "10px", "display": "inline-block"}),
+            html.Span(style={"backgroundColor": "#a29bfe", "width": "15px", "height": "15px", "display": "inline-block", "border": "1px solid #000"}),
+        ], style={"marginTop": "5px"})
     ], style={"marginBottom": "10px"}),
     cyto.Cytoscape(
         id="graph",
@@ -83,12 +96,15 @@ app.layout = html.Div([
     ),
     html.Div(id="info", style={"marginTop": "10px", "color": "green"}),
     dcc.Store(id="selected-node", data=None),  # store the selected node id
+    dcc.Store(id="adding-new", data=False),  # store if adding new node
+    # Tooltip for node details on hover, positioned in top-right corner
+    html.Div(id="tooltip", children="Hover over a node to see details.", style={"position": "fixed", "top": "10px", "right": "10px", "background": "white", "border": "1px solid black", "padding": "5px", "zIndex": 1000, "pointerEvents": "none", "display": "block"}),
     # Modal for editing node data (using html.Div with conditional display)
     html.Div(
         id="node-modal",
         children=[
             html.Div([
-                html.H4("Edit Node Data"),
+                html.H4("Add/Edit Node Data"),
                 html.Label("Name:"),
                 dcc.Input(id="name-input", type="text", placeholder="Enter name"),
                 html.Label("Age:"),
@@ -173,12 +189,37 @@ def generate_nodes(n_clicks, num):
     Input("btn-random", "n_clicks"),
     prevent_initial_call=True
 )
-
 def generate_random(n_clicks):
     elements = generate_random_graph()
     num_nodes = len([el for el in elements if "source" not in el["data"]])
     num_edges = len([el for el in elements if "source" in el["data"]])
     return elements, f"Random graph generated with {num_nodes} nodes and {num_edges} edges.", None
+
+@app.callback(
+    Output("node-modal", "style"),
+    Output("adding-new", "data"),
+    Output("name-input", "value"),
+    Output("age-input", "value"),
+    Output("occupation-input", "value"),
+    Input("btn-add-node", "n_clicks"),
+    prevent_initial_call=True
+)
+def open_add_modal(n_clicks):
+    return {"display": "block"}, True, "", "", ""
+
+@app.callback(
+    Output("tooltip", "children"),
+    Input("graph", "mouseoverNodeData"),
+    prevent_initial_call=True
+)
+def show_tooltip(mouseover_data):
+    if mouseover_data:
+        node_data = mouseover_data
+        name = node_data.get("name", "N/A")
+        age = node_data.get("age", "N/A")
+        occupation = node_data.get("occupation", "N/A")
+        return [f"Name: {name}", html.Br(), f"Age: {age}", html.Br(), f"Occupation: {occupation}"]
+    return "Hover over a node to see details."
 
 @app.callback(
     Output("graph", "elements", allow_duplicate=True),
@@ -193,7 +234,6 @@ def generate_random(n_clicks):
     State("node-modal", "style"),
     prevent_initial_call=True
 )
-
 def handle_node_tap(tap_data, elements, selected, mode, edge_type, modal_style):
     if not tap_data:
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update
@@ -232,9 +272,10 @@ def handle_node_tap(tap_data, elements, selected, mode, edge_type, modal_style):
         return elements, f"Editing data for node {node_id}.", None, {"display": "block"}
 
 @app.callback(
-    Output("node-modal", "style"),
+    Output("node-modal", "style", allow_duplicate=True),
     Output("graph", "elements", allow_duplicate=True),
     Output("info", "children", allow_duplicate=True),
+    Output("adding-new", "data", allow_duplicate=True),
     Input("save-btn", "n_clicks"),
     Input("cancel-btn", "n_clicks"),
     State("graph", "elements"),
@@ -242,24 +283,44 @@ def handle_node_tap(tap_data, elements, selected, mode, edge_type, modal_style):
     State("name-input", "value"),
     State("age-input", "value"),
     State("occupation-input", "value"),
+    State("adding-new", "data"),
     prevent_initial_call=True
 )
-def handle_modal(save_clicks, cancel_clicks, elements, tap_data, name, age, occupation):
+def handle_modal(save_clicks, cancel_clicks, elements, tap_data, name, age, occupation, adding_new):
     ctx = dash.callback_context
     if not ctx.triggered:
-        return dash.no_update, dash.no_update, dash.no_update
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
     button_id = ctx.triggered[0]["prop_id"].split(".")[0]
-    if button_id == "save-btn" and tap_data:
-        node_id = tap_data["id"]
-        for el in elements:
-            if el.get("data", {}).get("id") == node_id:
-                el["data"]["name"] = name or ""
-                el["data"]["age"] = age or ""
-                el["data"]["occupation"] = occupation or ""
-                el["data"]["label"] = name or f"Person {node_id}"
-                break
-        return {"display": "none"}, elements, f"Data saved for node {node_id}."
-    return {"display": "none"}, elements, "Cancelled."
+    if button_id == "save-btn":
+        if adding_new:
+            # Add new node
+            node_ids = []
+            for el in elements:
+                if "id" in el.get("data", {}):
+                    id_str = el["data"]["id"]
+                    if id_str.isdigit():
+                        node_ids.append(int(id_str))
+            max_id = max(node_ids) if node_ids else 0
+            new_id = str(max_id + 1)
+            new_node = {
+                "data": {"id": new_id, "label": name or f"Person {new_id}", "name": name or "", "age": age or "", "occupation": occupation or ""},
+                "position": random_position()
+            }
+            elements.append(new_node)
+            return {"display": "none"}, elements, f"New node {new_id} added.", False
+        else:
+            # Edit existing node
+            if tap_data:
+                node_id = tap_data["id"]
+                for el in elements:
+                    if el.get("data", {}).get("id") == node_id:
+                        el["data"]["name"] = name or ""
+                        el["data"]["age"] = age or ""
+                        el["data"]["occupation"] = occupation or ""
+                        el["data"]["label"] = name or f"Person {node_id}"
+                        break
+                return {"display": "none"}, elements, f"Data saved for node {node_id}.", False
+    return {"display": "none"}, elements, "Cancelled.", False
 
 if __name__ == "__main__":
     app.run(debug=True)
