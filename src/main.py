@@ -5,54 +5,121 @@ import dash_cytoscape as cyto
 
 app = dash.Dash(__name__)
 
+# Modern CSS styles
+card_style = {
+    "backgroundColor": "#ffffff",
+    "border": "1px solid #e0e0e0",
+    "borderRadius": "8px",
+    "padding": "20px",
+    "margin": "10px",
+    "boxShadow": "0 4px 8px rgba(0,0,0,0.1)",
+    "textAlign": "center",
+    "flex": "1",
+    "minWidth": "250px"
+}
+
+button_style = {
+    "backgroundColor": "#007bff",
+    "color": "white",
+    "border": "none",
+    "borderRadius": "5px",
+    "padding": "10px 20px",
+    "cursor": "pointer",
+    "fontSize": "16px",
+    "margin": "5px",
+    "width": "100%"
+}
+
+input_style = {
+    "padding": "10px",
+    "border": "1px solid #ccc",
+    "borderRadius": "5px",
+    "fontSize": "16px",
+    "width": "100px",
+    "marginBottom": "10px"
+}
+
+radio_container_style = {
+    "display": "flex",
+    "flexDirection": "column",
+    "alignItems": "flex-start",
+    "marginTop": "10px"
+}
+
+radio_item_style = {
+    "display": "flex",
+    "alignItems": "center",
+    "margin": "5px 0"
+}
+
+color_square_style = {
+    "width": "15px",
+    "height": "15px",
+    "display": "inline-block",
+    "marginLeft": "10px",
+    "border": "1px solid #000"
+}
+
 app.layout = html.Div([
-    html.H3("Create movable nodes"),
+    html.H3("Social Network Graph Builder", style={"textAlign": "center", "color": "#333", "marginBottom": "20px"}),
     html.Div([
-        dcc.Input(id="num-nodes", type="number", min=1, step=1, placeholder="Number of nodes"),
-        html.Button("Generate", id="btn-generate", n_clicks=0),
-        html.Button("Generate Random Graph", id="btn-random", n_clicks=0),
-        html.Button("Add New Node", id="btn-add-node", n_clicks=0),
-        html.Label("Mode:", style={"marginLeft": "20px"}),
-        dcc.RadioItems(
-            id="mode-toggle",
-            options=[
-                {"label": "Connect Mode", "value": "connect"},
-                {"label": "Add Data Mode", "value": "data"}
-            ],
-            value="connect",
-            inline=True
-        ),
-        html.Label("Edge Type:", style={"marginLeft": "20px"}),
-        dcc.RadioItems(
-            id="edge-type",
-            options=[
-                {"label": "Friend", "value": "friend"},
-                {"label": "Close Friend", "value": "close_friend"},
-                {"label": "Work Colleagues", "value": "work_colleagues"},
-                {"label": "Family", "value": "family"},
-                {"label": "Acquaintance", "value": "acquaintance"}
-            ],
-            value="friend",
-            inline=True
-        ),
         html.Div([
-            html.Span("Friend", style={"marginRight": "10px", "display": "inline-block"}),
-            html.Span(style={"backgroundColor": "#00b894", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
-            html.Span("Close Friend", style={"marginRight": "10px", "display": "inline-block"}),
-            html.Span(style={"backgroundColor": "#00cec9", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
-            html.Span("Work Colleagues", style={"marginRight": "10px", "display": "inline-block"}),
-            html.Span(style={"backgroundColor": "#fdcb6e", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
-            html.Span("Family", style={"marginRight": "10px", "display": "inline-block"}),
-            html.Span(style={"backgroundColor": "#e17055", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
-            html.Span("Acquaintance", style={"marginRight": "10px", "display": "inline-block"}),
-            html.Span(style={"backgroundColor": "#a29bfe", "width": "15px", "height": "15px", "display": "inline-block", "border": "1px solid #000"}),
-        ], style={"marginTop": "5px"})
-    ], style={"marginBottom": "10px"}),
+            html.H4("Graph Options"),
+            dcc.Input(id="num-nodes", type="number", min=1, step=1, placeholder="Number of nodes", style=input_style),
+            html.Button("Generate", id="btn-generate", n_clicks=0, style=button_style),
+            html.Button("Generate Random Graph", id="btn-random", n_clicks=0, style=button_style),
+            html.Button("Add New Node", id="btn-add-node", n_clicks=0, disabled=True, style=button_style),
+        ], style=card_style),
+        html.Div([
+            html.H4("Mode"),
+            html.Div([
+                html.Div([
+                    dcc.RadioItems(
+                        id="mode-toggle",
+                        options=[
+                            {"label": "Connect Mode", "value": "connect"},
+                            {"label": "Add Data Mode", "value": "data"},
+                            {"label": "Delete Mode", "value": "delete"}
+                        ],
+                        value="connect",
+                        style={"margin": "0"}
+                    )
+                ], style=radio_container_style)
+            ], style={"marginTop": "10px"})
+        ], style=card_style),
+        html.Div([
+            html.H4("Edge Types"),
+            dcc.RadioItems(
+                id="edge-type-radio",
+                options=[
+                    {"label": "Friend", "value": "friend"},
+                    {"label": "Close Friend", "value": "close_friend"},
+                    {"label": "Work Colleagues", "value": "work_colleagues"},
+                    {"label": "Family", "value": "family"},
+                    {"label": "Acquaintance", "value": "acquaintance"}
+                ],
+                value="friend",
+                style={"margin": "0"}
+            ),
+            html.Div([
+                html.Span("Friend", style={"marginRight": "10px", "display": "inline-block"}),
+                html.Span(style={"backgroundColor": "#00b894", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
+                html.Span("Close Friend", style={"marginRight": "10px", "display": "inline-block"}),
+                html.Span(style={"backgroundColor": "#00cec9", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
+                html.Span("Work Colleagues", style={"marginRight": "10px", "display": "inline-block"}),
+                html.Span(style={"backgroundColor": "#fdcb6e", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
+                html.Span("Family", style={"marginRight": "10px", "display": "inline-block"}),
+                html.Span(style={"backgroundColor": "#e17055", "width": "15px", "height": "15px", "display": "inline-block", "marginRight": "20px", "border": "1px solid #000"}),
+                html.Span("Acquaintance", style={"marginRight": "10px", "display": "inline-block"}),
+                html.Span(style={"backgroundColor": "#a29bfe", "width": "15px", "height": "15px", "display": "inline-block", "border": "1px solid #000"}),
+            ], style={"marginTop": "10px", "display": "flex", "flexWrap": "wrap", "justifyContent": "center"})
+        ], style=card_style),
+    ], style={"display": "flex", "flexWrap": "wrap", "justifyContent": "center", "marginBottom": "20px"}),
     cyto.Cytoscape(
         id="graph",
         elements=[],
         layout={"name": "preset"},  # preserve node positions so user drag is kept
-        style={"width": "100%", "height": "600px", "border": "1px solid #ccc"},
+        style={"width": "100%", "height": "600px", "border": "1px solid #ccc", "borderRadius": "8px"},
         userPanningEnabled=True,
         userZoomingEnabled=True,
         boxSelectionEnabled=False,
@@ -94,11 +161,12 @@ app.layout = html.Div([
             }}
         ]
     ),
-    html.Div(id="info", style={"marginTop": "10px", "color": "green"}),
+    html.Div(id="info", style={"marginTop": "10px", "color": "#28a745", "textAlign": "center", "fontSize": "18px"}),
     dcc.Store(id="selected-node", data=None),  # store the selected node id
     dcc.Store(id="adding-new", data=False),  # store if adding new node
+    dcc.Store(id="edge-type", data="friend"),  # store selected edge type
     # Tooltip for node details on hover, positioned in top-right corner
-    html.Div(id="tooltip", children="Hover over a node to see details.", style={"position": "fixed", "top": "10px", "right": "10px", "background": "white", "border": "1px solid black", "padding": "5px", "zIndex": 1000, "pointerEvents": "none", "display": "block"}),
+    html.Div(id="tooltip", children="Hover over a node to see details.", style={"position": "fixed", "top": "10px", "right": "10px", "background": "white", "border": "1px solid black", "padding": "5px", "zIndex": 1000, "pointerEvents": "none", "display": "block", "borderRadius": "5px"}),
     # Modal for editing node data (using html.Div with conditional display)
     html.Div(
         id="node-modal",
@@ -111,13 +179,25 @@ app.layout = html.Div([
                 dcc.Input(id="age-input", type="number", placeholder="Enter age"),
                 html.Label("Occupation:"),
                 dcc.Input(id="occupation-input", type="text", placeholder="Enter occupation"),
-                html.Button("Save", id="save-btn", n_clicks=0),
-                html.Button("Cancel", id="cancel-btn", n_clicks=0),
-            ], style={"padding": "20px", "backgroundColor": "white", "border": "1px solid #ccc", "position": "fixed", "top": "50%", "left": "50%", "transform": "translate(-50%, -50%)", "zIndex": 1000})
+                html.Button("Save", id="save-btn", n_clicks=0, style=button_style),
+                html.Button("Cancel", id="cancel-btn", n_clicks=0, style={**button_style, "backgroundColor": "#6c757d"}),
+            ], style={"padding": "20px", "backgroundColor": "white", "border": "1px solid #ccc", "position": "fixed", "top": "50%", "left": "50%", "transform": "translate(-50%, -50%)", "zIndex": 1000, "borderRadius": "8px", "boxShadow": "0 4px 8px rgba(0,0,0,0.1)"})
         ],
         style={"display": "none"}  # hidden by default
     )
-])
+], style={"backgroundColor": "#f8f9fa", "minHeight": "100vh", "padding": "20px"})
+
+# Add callback to sync the radio buttons to the store
+@app.callback(
+    Output("edge-type", "data"),
+    Input("edge-type-radio", "value"),
+    prevent_initial_call=True
+)
+def update_edge_type(value):
+    return value
+
+# Update the handle_node_tap to use the store
+# In handle_node_tap, change State("edge-type", "value") to State("edge-type", "data")
 
 def initial_position(num, width=900, height=550, margin=50):
     nodes = []
@@ -166,6 +246,14 @@ def generate_random_graph():
         edge_type = random.choice(edge_types)
         edges.append({"data": {"source": source, "target": target, "type": edge_type}})
     return nodes + edges
+
+@app.callback(
+    Output("btn-add-node", "disabled"),
+    Input("graph", "elements")
+)
+def disable_buttons(elements):
+    disabled = len(elements) == 0
+    return disabled
 
 @app.callback(
     Output("graph", "elements"),
@@ -230,7 +318,7 @@ def show_tooltip(mouseover_data):
     State("graph", "elements"),
     State("selected-node", "data"),
     State("mode-toggle", "value"),
-    State("edge-type", "value"),
+    State("edge-type", "data"),
     State("node-modal", "style"),
     prevent_initial_call=True
 )
@@ -270,6 +358,11 @@ def handle_node_tap(tap_data, elements, selected, mode, edge_type, modal_style):
     elif mode == "data":
         # Data mode: show modal for the node
         return elements, f"Editing data for node {node_id}.", None, {"display": "block"}
+    elif mode == "delete":
+        # Delete mode: remove the node and its edges
+        elements = [el for el in elements if not (el.get("data", {}).get("id") == node_id)]
+        elements = [el for el in elements if not (el.get("data", {}).get("source") == node_id or el.get("data", {}).get("target") == node_id)]
+        return elements, f"Node {node_id} and its connections deleted.", None, modal_style
 
 @app.callback(
     Output("node-modal", "style", allow_duplicate=True),
