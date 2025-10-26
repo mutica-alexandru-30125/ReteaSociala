@@ -1,0 +1,8 @@
+networkx
+matplotlib
+ipywidgets
+pyvis
+dash
+dash-cytoscape
+jupyter-dash
+community
