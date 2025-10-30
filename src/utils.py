@@ -22,14 +22,47 @@ def initial_position(num, width=900, height=550, margin=50):
         })
     return nodes
 
-def random_position(width=900, height=550, margin=50):
+def random_position(width=5000, height=1500, margin=50):
     return {"x": random.randint(margin, width - margin), "y": random.randint(margin, height - margin)}
 
 def generate_random_graph():
-    num_nodes = random.randint(5, 15)
+    num_nodes = random.randint(100, 1000)
     nodes = []
-    names =  ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Raul", "Michel", "John", "Alex"]
-    occupations = ["Engineer", "Teacher", "Doctor", "Artist", "Chef", "Lawyer", "Scientist", "Writer", "Nurse", "Programmer"]
+    names = [
+        "Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry", "Ivy", "Jack",
+        "Kate", "Liam", "Mia", "Noah", "Olivia", "Raul", "Michel", "John", "Alex",
+        "Aaron", "Abigail", "Adrian", "Agnes", "Alan", "Albert", "Amanda", "Amelia", "Andreas", "Angela",
+        "Anita", "Anthony", "Antonio", "April", "Aria", "Ariana", "Ashley", "Astrid", "Barbara", "Beatrice",
+        "Benjamin", "Bianca", "Brandon", "Brenda", "Brian", "Brittany", "Bryan", "Carlos", "Caroline", "Carla",
+        "Casey", "Cecilia", "Christian", "Christina", "Clara", "Claudia", "Cole", "Colin", "Connor", "Daniel",
+        "Danielle", "David", "Deborah", "Denise", "Derek", "Dominic", "Eleanor", "Elena", "Elijah", "Elisa",
+        "Elizabeth", "Emily", "Emma", "Eric", "Esther", "Ethan", "Eva", "Felix", "Felicia", "Fernanda",
+        "Fernando", "Fiona", "Florence", "Francesca", "Frederick", "Gabriel", "Gabriella", "Geoffrey", "Georgia", "Gerald",
+        "Gianna", "Gloria", "Grant", "Gustavo", "Hannah", "Harold", "Heather", "Helen", "Hugo", "Igor",
+        "Isabella", "Isla", "Jacob", "James", "Janet", "Jason", "Jasper", "Jeremy", "Jessica", "Joan",
+        "Joe", "Joseph", "Joshua", "Julia", "Julian", "Justin", "Karen", "Karl", "Katherine", "Kayla",
+        "Keith", "Kelly", "Kevin", "Kyle", "Laura", "Lawrence", "Leon", "Linda", "Luis", "Lydia",
+        "Madeline", "Maria", "Mariana", "Mark", "Martha", "Martin", "Martina", "Matthew", "Max", "Melanie",
+        "Melissa", "Michael", "Mikhail", "Morgan", "Natalie", "Nathan", "Neil", "Nico", "Nicole", "Nina",
+        "Oliver", "Oscar", "Pamela", "Patricia", "Patrick", "Paula", "Peter", "Philippa", "Phillip", "Quentin",
+        "Rachel", "Ralph", "Rebecca", "Regina", "Renata", "Richard", "Roberto", "Robert", "Rosa", "Ross",
+        "Ruby", "Ryan", "Sabrina", "Samantha", "Samuel", "Scott", "Sean", "Sebastian", "Shawn", "Sophia",
+        "Stephanie", "Steve", "Steven", "Stella", "Susan", "Teresa", "Thomas", "Tiffany", "Timothy", "Travis",
+        "Tristan", "Valentina", "Valerie", "Vanessa", "Victor", "Victoria", "Vincent", "Walter", "Wayne", "Xavier",
+        "Yasmine", "Yolanda", "Zachary", "Zoe"
+    ]    
+    occupations = [
+        "Engineer", "Teacher", "Doctor", "Artist", "Chef", "Lawyer", "Scientist", "Writer", "Nurse", "Programmer",
+        "Architect", "Accountant", "Designer", "Photographer", "Pharmacist", "Electrician", "Plumber", "Mechanic", "Farmer", "Pilot",
+        "Flight Attendant", "Police Officer", "Firefighter", "Paramedic", "Social Worker", "Psychologist", "Researcher", "Data Scientist", "Machine Learning Engineer", "Web Developer",
+        "Mobile Developer", "Database Administrator", "System Administrator", "Network Engineer", "DevOps Engineer", "Product Manager", "Project Manager", "Business Analyst", "Marketing Manager", "Sales Representative",
+        "HR Specialist", "Recruiter", "Consultant", "Financial Analyst", "Investment Banker", "Real Estate Agent", "Interior Designer", "UX Designer", "UI Designer", "Graphic Designer",
+        "Animator", "Video Editor", "Sound Engineer", "Actor", "Director", "Producer", "Translator", "Interpreter", "Journalist", "Editor",
+        "Biologist", "Chemist", "Physicist", "Geologist", "Mathematician", "Statistician", "Economist", "Zoologist", "Logistician", "Supply Chain Manager",
+        "Quality Assurance Tester", "Cybersecurity Analyst", "IT Support Specialist", "Petroleum Engineer", "Civil Engineer", "Mechanical Engineer", "Chemical Engineer", "Biomedical Engineer", "Environmental Scientist", "Urban Planner",
+        "Principal", "Librarian", "Coach", "Personal Trainer", "Dentist", "Orthodontist", "Optometrist", "Veterinarian", "Investment Advisor", "Event Planner",
+        "Bartender", "Barista", "Receptionist", "Customer Support Representative", "Legal Assistant", "Paralegal", "Judge", "Clergy", "Historian", "Archivist"
+    ]
     for i in range(1, num_nodes + 1):
         name = random.choice(names)
         age = random.randint(18, 65)
